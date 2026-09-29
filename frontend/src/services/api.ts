@@ -95,10 +95,25 @@ export const api = {
   getWorkloadComparison: () => fetchJSON<WorkloadComparisonItem[]>('/dashboard/workload-comparison'),
   getExperimentComparison: () => fetchJSON<ExperimentComparisonItem[]>('/dashboard/experiment-comparison'),
 
-  // Exports
-  getExportInfo: () => fetchJSON<ExportInfo>('/exports/info'),
+  // Exports & Dynamic CSV Integration
+  getExportInfo: () => fetchJSON<ExportInfo & { available_runs?: string[] }>('/exports/info'),
   getMasterCSVUrl: () => `${API_BASE_URL}/exports/master`,
   getRunCSVUrl: (id: string) => `${API_BASE_URL}/exports/run/${encodeURIComponent(id)}`,
+  getCSVData: (source = 'master') =>
+    fetchJSON<import('../types').CSVDataResponse>(`/exports/csv-data?source=${encodeURIComponent(source)}`),
+  uploadCSV: async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await fetch(`${API_BASE_URL}/exports/upload-csv`, {
+      method: 'POST',
+      body: formData,
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: 'Upload failed' }));
+      throw new Error(err.detail || 'Upload failed');
+    }
+    return res.json() as Promise<import('../types').CSVDataResponse>;
+  },
 
   // Settings
   getSettings: () => fetchJSON<SettingsData>('/settings'),

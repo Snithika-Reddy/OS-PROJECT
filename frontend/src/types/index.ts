@@ -186,3 +186,49 @@ export interface SettingsData {
   default_workload_duration: number;
   enable_process_monitoring: boolean;
 }
+
+export interface CSVDataResponse {
+  filename: string;
+  total_rows: number;
+  columns: string[];
+  workloads: string[];
+  experiments: string[];
+  summary: {
+    avg_cpu_percent: number;
+    peak_cpu_percent: number;
+    avg_ram_percent: number;
+    peak_ram_percent: number;
+    avg_disk_read_mb: number;
+    peak_disk_read_mb: number;
+    avg_disk_write_mb: number;
+    peak_disk_write_mb: number;
+    avg_runtime_seconds: number;
+    strain_score: number;
+  };
+  workload_breakdown: {
+    workload_name: string;
+    sample_count: number;
+    avg_cpu_percent: number;
+    peak_cpu_percent: number;
+    avg_ram_percent: number;
+    peak_ram_percent: number;
+    avg_disk_read_mb: number;
+    avg_disk_write_mb: number;
+  }[];
+  timeseries: {
+    index: number;
+    elapsed_seconds: number;
+    timestamp: string;
+    workload_name: string;
+    experiment_id: string;
+    cpu_percent: number;
+    ram_percent: number;
+    disk_read_mb_per_sec: number;
+    disk_write_mb_per_sec: number;
+    network_sent_mb_per_sec: number;
+    network_received_mb_per_sec: number;
+    process_count: number;
+  }[];
+  rows: Record<string, any>[];
+}
+

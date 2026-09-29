@@ -1,3 +1,10 @@
+import os
+# Constrain BLAS threadpools to avoid Windows memory allocation errors
+os.environ["OPENBLAS_NUM_THREADS"] = "2"
+os.environ["MKL_NUM_THREADS"] = "2"
+os.environ["NUMEXPR_NUM_THREADS"] = "2"
+os.environ["OMP_NUM_THREADS"] = "2"
+
 import asyncio
 import logging
 from contextlib import asynccontextmanager
