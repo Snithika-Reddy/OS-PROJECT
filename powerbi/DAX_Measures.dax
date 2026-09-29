@@ -1,0 +1,111 @@
+// ==============================================================================
+// OS PERFORMANCE ANALYTICS & BOTTLENECK DETECTION - POWER BI DAX MEASURES
+// Table: performance_master
+// ==============================================================================
+
+// ------------------------------------------------------------------------------
+// 1. CPU Metrics
+// ------------------------------------------------------------------------------
+Average CPU % = 
+AVERAGE(performance_master[cpu_percent])
+
+Peak CPU % = 
+MAX(performance_master[cpu_percent])
+
+CPU Pressure Status = 
+SWITCH(
+    TRUE(),
+    [Average CPU %] >= 90, "CRITICAL PRESSURE",
+    [Average CPU %] >= 75, "ELEVATED",
+    "NORMAL"
+)
+
+// ------------------------------------------------------------------------------
+// 2. Memory / RAM Metrics
+// ------------------------------------------------------------------------------
+Average RAM % = 
+AVERAGE(performance_master[ram_percent])
+
+Peak RAM % = 
+MAX(performance_master[ram_percent])
+
+Average Used RAM (GB) = 
+AVERAGE(performance_master[ram_used_gb])
+
+Min Available RAM (GB) = 
+MIN(performance_master[ram_available_gb])
+
+RAM Pressure Status = 
+SWITCH(
+    TRUE(),
+    [Average RAM %] >= 90, "CRITICAL PRESSURE",
+    [Average RAM %] >= 75, "ELEVATED",
+    "NORMAL"
+)
+
+// ------------------------------------------------------------------------------
+// 3. Disk Subsystem Metrics
+// ------------------------------------------------------------------------------
+Average Disk Read (MB/s) = 
+AVERAGE(performance_master[disk_read_mb_per_sec])
+
+Peak Disk Read (MB/s) = 
+MAX(performance_master[disk_read_mb_per_sec])
+
+Average Disk Write (MB/s) = 
+AVERAGE(performance_master[disk_write_mb_per_sec])
+
+Peak Disk Write (MB/s) = 
+MAX(performance_master[disk_write_mb_per_sec])
+
+Total Disk Throughput (MB/s) = 
+[Average Disk Read (MB/s)] + [Average Disk Write (MB/s)]
+
+Disk Activity Status = 
+SWITCH(
+    TRUE(),
+    [Total Disk Throughput (MB/s)] >= 50, "HIGH DISK I/O",
+    [Total Disk Throughput (MB/s)] >= 20, "MODERATE DISK I/O",
+    "LOW DISK I/O"
+)
+
+// ------------------------------------------------------------------------------
+// 4. Network Metrics
+// ------------------------------------------------------------------------------
+Average Network Sent (MB/s) = 
+AVERAGE(performance_master[network_sent_mb_per_sec])
+
+Average Network Recv (MB/s) = 
+AVERAGE(performance_master[network_received_mb_per_sec])
+
+Total Network Throughput (MB/s) = 
+[Average Network Sent (MB/s)] + [Average Network Recv (MB/s)]
+
+// ------------------------------------------------------------------------------
+// 5. Workload & Execution Performance
+// ------------------------------------------------------------------------------
+Average Execution Time (s) = 
+AVERAGE(performance_master[execution_time_seconds])
+
+Max Execution Time (s) = 
+MAX(performance_master[execution_time_seconds])
+
+Total Experiment Runs = 
+DISTINCTCOUNT(performance_master[experiment_id])
+
+Distinct Workloads Tested = 
+DISTINCTCOUNT(performance_master[workload_name])
+
+Total Sample Measurements = 
+COUNTROWS(performance_master)
+
+// ------------------------------------------------------------------------------
+// 6. Composite Bottleneck Scoring Index (0 - 100)
+// ------------------------------------------------------------------------------
+Resource Strain Score = 
+ROUND(
+    ([Average CPU %] * 0.40) + 
+    ([Average RAM %] * 0.35) + 
+    (MIN([Total Disk Throughput (MB/s)] * 0.5, 25)),
+    1
+)
